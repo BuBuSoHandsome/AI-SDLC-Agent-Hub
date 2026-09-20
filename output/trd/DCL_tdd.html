@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+  body { width:1900px; padding:36px 44px; background:#fff; }
+  h1 { text-align:center; font-size:30px; margin-bottom:10px; }
+  .sub { text-align:center; color:#666; font-size:16px; margin-bottom:24px; }
+  .grid { display:grid; grid-template-columns: 520px 90px 640px 90px 520px; align-items:center; }
+  .colh { text-align:center; font-size:20px; font-weight:bold; padding:12px 0; border-radius:10px; margin-bottom:6px;}
+  .ch1 { background:#fdf3e7; color:#d35400; } .ch2 { background:#eef2fa; color:#2f6fd6; } .ch3 { background:#fdeaea; color:#c0392b; }
+  .cell { padding:10px 6px; display:flex; justify-content:center; align-items:center; }
+  .arrow { text-align:center; font-size:34px; color:#888; font-family:Consolas,monospace; }
+  .spacer { height:26px; grid-column:1/-1; }
+  .vflow { text-align:center; color:#2f6fd6; font-size:26px; }
+  .box { background:#fff; border-radius:10px; padding:14px 20px; border:3px solid #888; width:100%; }
+  .box h3 { font-size:19px; margin-bottom:8px; }
+  .box ul { padding-left:20px; font-size:15px; line-height:1.7; color:#333; }
+  .bl { border-color:#2f6fd6; } .bl h3{color:#2f6fd6;}
+  .be { border-color:#c0392b; background:#fdf6f5; } .be h3{color:#c0392b;}
+  .bp { border-color:#7c3aed; } .bp h3{color:#7c3aed;}
+  .hl { color:#d35400; font-weight:bold; }
+  .uml { background:#fff; border:2.5px solid #d35400; width:100%; font-family:"JetBrains Mono",Consolas,monospace; }
+  .uml .title { text-align:center; font-weight:bold; font-size:17px; padding:9px 14px; color:#d35400; border-bottom:2.5px solid #d35400; background:#fdf3e7; }
+  .uml .body { padding:12px 16px; font-size:14px; line-height:1.7; color:#333; }
+  .tag { font-size:13px; color:#888; font-weight:normal; }
+  .legend { border:2px solid #ccc; border-radius:10px; padding:16px 22px; font-size:15px; color:#555; margin-top:26px; }
+</style></head><body>
+<h1>GET /loans/debt-consolidation</h1>
+<div class="sub">common component（原子能力 / 常量）｜logic flow（本服务类，承接 4.x 逻辑）｜error handling（中止流程）</div>
+
+<div class="grid">
+  <div class="colh ch1">common component</div><div></div>
+  <div class="colh ch2">logic flow</div><div></div>
+  <div class="colh ch3">error handling</div>
+
+  <!-- 4.1 -->
+  <div class="cell"></div><div></div>
+  <div class="cell"><div class="box bl">
+    <h3>DebtConsolidationController <span class="tag">｜4.1 Entry &amp; Routing</span></h3>
+    <ul><li>接收客户端 GET /loans/debt-consolidation 请求</li></ul>
+  </div></div><div></div>
+  <div class="cell"></div>
+
+  <div class="spacer vflow">▼</div>
+
+  <!-- 4.2 -->
+  <div class="cell"></div><div></div>
+  <div class="cell"><div class="box bl">
+    <h3>DebtConsolidationParameterValidator <span class="tag">｜4.2 Parameter Validation</span></h3>
+    <ul><li>标准校验入口：validate() 当前无 parameter，恒 return true</li>
+    <li>未来新增入参时在此类内扩展校验规则</li></ul>
+  </div></div><div></div>
+  <div class="cell"></div>
+
+  <div class="spacer vflow">▼</div>
+
+  <!-- 4.3 -->
+  <div class="cell"><div class="uml">
+    <div class="title">CUS INSINQP Client（common jar）</div>
+    <div class="body">+ getCustomerDemographicDataDtl(permId)<br>&nbsp;&nbsp;: HaseCustomerDemographicDataDtlResponse</div>
+  </div></div>
+  <div class="arrow">◀——</div>
+  <div class="cell"><div class="box bl">
+    <h3>CustomerInfoService <span class="tag">｜4.3 Call Backend CUS INSINQP</span></h3>
+    <ul>
+      <li>经 <span class="hl">common jar</span> Call backend CUS INSINQP 获取客人信息</li>
+      <li>获取成功 → 带客人信息进入 4.4</li>
+      <li>获取失败 → 进入 4.6 error handling</li>
+    </ul>
+  </div></div>
+  <div class="arrow">——▶</div>
+  <div class="cell"><div class="box be">
+    <h3>CallCusFailedHandler <span class="tag">｜4.6 Call CUS failed</span></h3>
+    <ul><li>中止流程，返回 2.2.2 Sample Response（demographic response is null）到前端</li></ul>
+  </div></div>
+
+  <div class="spacer vflow">▼</div>
+
+  <!-- 4.4 -->
+  <div class="cell"><div class="uml">
+    <div class="title">Constants</div>
+    <div class="body">+ static final String ID_TYPE_HKID = "I"</div>
+  </div></div>
+  <div class="arrow">◀——</div>
+  <div class="cell"><div class="box bl">
+    <h3>DebtConsolidationService <span class="tag">｜4.4 Post CUS Call handling</span></h3>
+    <ul>
+      <li>业务总管：拿到 4.3 客人信息后的业务逻辑统一在此类承载</li>
+      <li>当前规则：判断【客户证件类型】是否为 <span class="hl">Constants.ID_TYPE_HKID</span> 常量</li>
+      <li>证件类型是 HKID → 带客人信息进入 4.5</li>
+      <li>否则 → 进入 4.7 error handling</li>
+    </ul>
+  </div></div>
+  <div class="arrow">——▶</div>
+  <div class="cell"><div class="box be">
+    <h3>IdTypeInvalidHandler <span class="tag">｜4.7 Customer Id type invalid</span></h3>
+    <ul><li>中止流程，返回 2.2.3 Sample Response（Customer id type is non HKID）到前端</li></ul>
+  </div></div>
+
+  <div class="spacer vflow">▼</div>
+
+  <!-- 4.5 -->
+  <div class="cell" style="flex-direction:column; gap:16px;"><div class="uml">
+    <div class="title">MaskingService（common jar）</div>
+    <div class="body">+ mask(String target, MaskingEnum maskingEnum) : String</div>
+  </div>
+  <div class="uml" style="border-color:#555;">
+    <div class="title" style="color:#444; border-bottom-color:#555; background:#f4f4f5;">contact-prefer-time.json（配置文件）</div>
+    <div class="body">维护 en_hk / zh_hk / zh_cn 的首选联系时间选项列表</div>
+  </div></div>
+  <div class="arrow">◀——</div>
+  <div class="cell"><div class="box bp">
+    <h3>DebtConsolidationResponseBuilder <span class="tag">｜4.5 PAPI Response Assembly</span></h3>
+    <ul>
+      <li>从 4.4 客人信息获取【客户全名】和【电话号码】</li>
+      <li>经 <span class="hl">common jar MaskingService</span> 对【电话号码】进行脱敏处理</li>
+      <li>根据请求头传入的语言标识取【首选联系时间选项列表】（找不到匹配语言默认英文版）</li>
+      <li>组装【客户全名】+ 脱敏后【电话号码】+【首选联系时间选项列表】，返回 2.2.1 Sample Response 到前端</li>
+    </ul>
+  </div></div><div></div>
+  <div class="cell"></div>
+</div>
+
+<div class="legend">
+  说明：logic flow 列每个类承接一个 4.x 标题的逻辑；◀—— 表示调用 common component 原子能力 / 引用常量；——▶ 表示中止流程转入 error handling；▼ 表示主流程自上而下推进。两条中止分支（2.2.2 / 2.2.3）统一收口在 error handling 列。
+</div>
+</body></html>
